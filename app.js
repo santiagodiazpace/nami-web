@@ -223,12 +223,12 @@
   // Content entries can be replaced with real cases. No client claims or fabricated results.
   const projects = [
     { name:'Project 01', category:'Diseño web / Desarrollo', description:'Una exploración de dirección de arte para una web con personalidad. Tipografía protagonista, una jerarquía clara y una composición que se adapta a distintas pantallas.', tags:['Dirección de arte','UI','Responsive'], image:'', technologies:[], url:'', year:'2026' },
-    { name:'Project 02', category:'Herramientas a medida / UX', description:'Un concepto centrado en ordenar lo complejo. Partir de una necesidad, entender el proceso y darle una estructura que resulte simple para quien la usa.', tags:['Experiencia de usuario','Producto digital','Sistemas'], image:'', technologies:[], url:'', year:'2026' },
+    { name:'Project 02', category:'Producto digital / Landing page', description:'Una landing para presentar una herramienta de seguridad digital con una interfaz clara, directa y confiable.', tags:['Producto digital','UI','Seguridad'], image:'', technologies:[], url:'', year:'2026' },
     { name:'Project 03', category:'Identidad visual / Diseño gráfico', description:'Un estudio tipográfico sobre consistencia visual. Un lenguaje reconocible que puede acompañar a una marca en distintas piezas, formatos y puntos de contacto.', tags:['Identidad visual','Tipografía','Sistema gráfico'], image:'', technologies:[], url:'', year:'2026' }
   ];
   const dialog = $('.project-dialog');
   let projectOpener = null;
-  $$('.project-open').forEach(button => button.addEventListener('click', () => {
+  $$('.project-open[data-project]').forEach(button => button.addEventListener('click', () => {
     const project = projects[Number(button.dataset.project)];
     if (!project) return;
     projectOpener = button;

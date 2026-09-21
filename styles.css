@@ -829,6 +829,8 @@ button {
   background: none;
   text-align: left;
   padding: 0;
+  color: inherit;
+  text-decoration: none;
   transition: transform 0.12s var(--ease);
 }
 .project-open:active {
@@ -851,6 +853,14 @@ button {
 .visual-one {
   background: #bfc3c7;
   color: #111;
+}
+.project-cover {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.7s var(--ease);
 }
 .project-poster {
   position: absolute;
@@ -913,12 +923,19 @@ button {
     transform 0.3s;
   z-index: 4;
 }
+.visual-one .project-action {
+  background: var(--ink);
+  color: white;
+}
 .project-open:hover .project-action {
   transform: translateY(0);
   background: var(--cyan);
 }
 .project-open:hover .project-poster {
   transform: rotate(-3deg) scale(1.025);
+}
+.project-open:hover .project-cover {
+  transform: scale(1.025);
 }
 .project-info {
   padding-top: 21px;
@@ -950,6 +967,9 @@ button {
 .visual-two {
   background: #16252d;
   color: white;
+}
+.visual-two .system-composition {
+  display: none;
 }
 .system-composition {
   display: block;
