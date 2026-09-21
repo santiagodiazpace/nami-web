@@ -1021,6 +1021,9 @@ button {
   background: #161616;
   color: white;
 }
+.visual-three .brand-exploration {
+  display: none;
+}
 .brand-exploration {
   padding: 9% 11%;
   display: flex;

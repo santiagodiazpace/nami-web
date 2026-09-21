@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="preconnect" href="https://d2ol7oe51mr4n9.cloudfront.net" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#f7f7f8;--glass:rgba(36,36,38,.42);--glass-2:rgba(28,28,30,.48);--red:#e23b32;--vh:100vh;--pad:clamp(14px,4vw,36px);--nav-top:max(14px,env(safe-area-inset-top,0px));--safe-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+*{box-sizing:border-box;margin:0;padding:0}
+html{overflow-x:clip}
+body{background:#0a0a0b;color:var(--ink);font-family:Inter,Helvetica Neue,Arial,sans-serif;overflow-x:clip}
+button,a{font-family:inherit;color:inherit}
+.cx-boot{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0a0a0b;transition:opacity .7s ease,visibility .7s}
+.cx-boot.done{opacity:0;visibility:hidden}
+.cx-boot p{font-size:12.5px;letter-spacing:.05em;color:rgba(255,255,255,.42)}
+.cx-bar{width:150px;height:1px;background:rgba(255,255,255,.16);overflow:hidden}
+.cx-bar i{display:block;height:100%;width:100%;background:var(--ink);transform:scaleX(0);transform-origin:0 50%}
+.cx-nav-wrap{position:fixed;top:var(--nav-top);left:0;right:0;z-index:80;display:flex;justify-content:center;padding:0 max(14px,env(safe-area-inset-left,0px)) 0 max(14px,env(safe-area-inset-right,0px));pointer-events:none}
+.cx-nav{pointer-events:auto;display:flex;align-items:center;gap:18px;max-width:min(100%,520px);padding:6px 8px 6px 16px;border-radius:999px;background:rgba(48,48,50,.55);border:1px solid rgba(255,255,255,.12);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);box-shadow:0 10px 40px rgba(0,0,0,.18)}
+.cx-logo{display:flex;align-items:center;gap:8px;text-decoration:none;padding-right:8px;min-width:0}
+.cx-logo svg{display:block}
+.cx-logo span{font-size:18px;font-weight:500;letter-spacing:-.03em}
+.cx-seg{display:flex;align-items:center;background:rgba(255,255,255,.06);border-radius:999px;padding:3px;flex-shrink:0}
+.cx-seg button{border:0;background:transparent;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;padding:8px 16px;min-height:44px;border-radius:999px;cursor:pointer;transition:background .25s ease,color .25s ease;-webkit-tap-highlight-color:transparent}
+.cx-seg button.is-on{background:rgba(22,22,24,.92);color:#fff}
+.cx-stage{position:fixed;top:0;left:0;width:100%;height:var(--vh);z-index:1;overflow:hidden}
+.cx-layer{position:absolute;inset:0;opacity:0;will-change:opacity}
+.cx-hero{background:#0a0a0b;isolation:isolate}
+.cx-apps{background:#0d0d0e}
+.cx-track{position:relative;z-index:0}
+.cx-hero-copy{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:flex-start;text-align:left;padding:calc(88px + env(safe-area-inset-top,0px)) var(--pad) 0 max(var(--pad),env(safe-area-inset-left,0px));pointer-events:none}
+.cx-hero-copy h1{font-weight:500;letter-spacing:-.045em;line-height:1.18;color:rgba(255,255,255,.92);font-size:clamp(24px,3.6vw,52px);max-width:min(18ch,100%)}
+.cx-hero-media{position:absolute;inset:0;pointer-events:none}
+.cx-hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:screen;will-change:transform;transform:translateZ(0)}
+.cx-scene{position:absolute;inset:0;opacity:0;transition:opacity .55s ease}
+.cx-scene.is-on{opacity:1}
+.cx-scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cx-scene .cx-bg{filter:blur(28px) saturate(1.08) brightness(.55);transform:scale(1.14)}
+.cx-scene .cx-cable{z-index:2}
+.cx-apps-ui{position:absolute;inset:0;z-index:5;display:grid;grid-template-columns:auto 1fr auto;align-items:end;padding:calc(88px + env(safe-area-inset-top,0px)) max(var(--pad),env(safe-area-inset-right,0px)) calc(34px + var(--safe-bottom)) max(var(--pad),env(safe-area-inset-left,0px));pointer-events:none}
+.cx-apps-ui>*{pointer-events:auto}
+.cx-menu{width:320px;background:var(--glass);border:0;-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);border-radius:10px;padding:22px 18px}
+.cx-opt{display:block;width:100%;text-align:left;background:none;border:0;color:rgba(255,255,255,.42);font-size:17px;font-weight:500;letter-spacing:-.02em;padding:9px 4px;min-height:44px;cursor:pointer;transition:color .25s ease;-webkit-tap-highlight-color:transparent}
+.cx-opt.is-on{color:#fff}
+.cx-opt img{display:block;width:100%;height:0;object-fit:cover;border-radius:8px;margin:0;opacity:0;transition:height .45s ease,opacity .35s ease,margin .45s ease}
+.cx-opt.is-on img{height:172px;margin:12px 0 10px;opacity:1}
+.cx-hotspot{width:54px;height:54px;margin:0 auto;align-self:center;border:1.5px solid rgba(255,255,255,.85);border-radius:50%;display:grid;place-items:center;pointer-events:none}
+.cx-hotspot i{width:8px;height:8px;background:#fff;border-radius:50%}
+.cx-card{width:min(420px,34vw);background:var(--glass-2);border:0;-webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);border-radius:14px;padding:28px 28px 26px;min-height:280px}
+.cx-card h2{font-size:clamp(28px,2.8vw,42px);font-weight:600;letter-spacing:-.04em;margin-bottom:22px}
+.cx-spec{display:flex;gap:10px;margin:0 0 16px;align-items:flex-start}
+.cx-spec b{display:block;width:3px;height:14px;margin-top:3px;background:var(--red);flex-shrink:0;border-radius:2px}
+.cx-spec small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:600;margin-bottom:4px}
+.cx-spec span{font-size:15px;font-weight:500;word-break:break-word}
+.cx-tag{display:inline-block;margin-top:4px;background:var(--red);color:#fff;font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px;max-width:100%;word-break:break-word}
+.cx-swatches{display:flex;gap:8px;margin-top:8px}
+.cx-swatches i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.35);display:block}
+.cx-more{position:absolute;left:50%;bottom:calc(14px + var(--safe-bottom));transform:translateX(-50%);z-index:6;border:0;background:rgba(20,20,22,.28);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);color:rgba(255,255,255,.78);padding:12px 20px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;text-align:center;max-width:calc(100% - 28px);white-space:normal;line-height:1.3;-webkit-tap-highlight-color:transparent}
+@media (max-width:1024px){.cx-menu{width:min(320px,38vw)}.cx-card{width:min(420px,40vw)}}
+@media (max-width:900px){
+  .cx-nav-wrap{padding:0 10px}
+  .cx-nav{gap:8px;padding:4px 4px 4px 10px;width:100%;max-width:100%}
+  .cx-logo{padding-right:4px;min-width:0}
+  .cx-logo span{font-size:15px}
+  .cx-seg button{font-size:11px;padding:8px 10px}
+  .cx-hero-copy{padding:calc(76px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px))}
+  .cx-hero-copy h1{font-size:clamp(22px,6.2vw,28px);line-height:1.22;max-width:100%}
+  .cx-apps-ui{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:end;gap:10px;padding:calc(72px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) calc(58px + var(--safe-bottom)) max(14px,env(safe-area-inset-left,0px))}
+  .cx-hotspot{display:none}
+  .cx-menu{order:2;width:100%;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+  .cx-menu::-webkit-scrollbar{display:none}
+  .cx-card{order:1;width:100%;min-height:0;padding:18px 16px}
+  .cx-card h2{font-size:clamp(22px,6vw,26px);margin-bottom:12px}
+  .cx-opt{flex:0 0 auto;width:min(168px,44vw);font-size:13px;line-height:1.25;padding:8px 6px;scroll-snap-align:center}
+  .cx-opt img{display:none}
+  .cx-opt.is-on img{display:block;height:64px;margin:8px 0 6px}
+  .cx-spec{margin-bottom:12px}
+  .cx-spec span{font-size:14px}
+  .cx-spec small{font-size:9px}
+  .cx-more{bottom:calc(10px + var(--safe-bottom));font-size:12px;padding:10px 16px}
+}
+@media (max-width:480px){
+  .cx-seg button{font-size:10px;padding:8px 8px}
+  .cx-logo svg{width:18px;height:18px}
+  .cx-logo span{font-size:14px}
+  .cx-hero-copy h1{font-size:21px}
+  .cx-opt{width:min(152px,48vw);font-size:12px}
+  .cx-card h2{font-size:21px}
+  .cx-tag{font-size:10px;padding:3px 6px}
+}
+@media (max-height:500px) and (orientation:landscape){
+  .cx-hero-copy{padding-top:calc(64px + env(safe-area-inset-top,0px))}
+  .cx-hero-copy h1{font-size:20px;max-width:24ch}
+  .cx-apps-ui{padding-top:calc(56px + env(safe-area-inset-top,0px));padding-bottom:calc(48px + var(--safe-bottom));gap:8px}
+  .cx-card{padding:14px}
+  .cx-card h2{font-size:20px;margin-bottom:8px}
+  .cx-spec{margin-bottom:8px}
+  .cx-opt.is-on img{height:48px}
+}
+</style>
+</helmet>
+<div ref="{{ setRoot }}">
+<div class="cx-boot" id="boot">
+  <div class="cx-bar"><i></i></div>
+  <p>LOADING 0%</p>
+</div>
+<div class="cx-nav-wrap">
+  <nav class="cx-nav">
+    <a class="cx-logo" href="#top" aria-label="cordex">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10.2" stroke="white" stroke-width="1.4"></circle>
+        <path d="M8.2 16.4V7.6h4.1c2.05 0 3.25 1.05 3.25 2.55 0 1.08-.62 1.95-1.62 2.28L16.4 16.4h-2.2l-2.18-3.55H10v3.55H8.2zm1.8-5.15h2.02c.92 0 1.48-.5 1.48-1.22S13 8.8 12.08 8.8H10v2.45z" fill="white"></path>
+      </svg>
+      <span>cordex</span>
+    </a>
+    <div class="cx-seg">
+      <button type="button" class="cx-btn-full is-on">Full mode</button>
+      <button type="button" class="cx-btn-overview">Explore</button>
+    </div>
+  </nav>
+</div>
+<div class="cx-stage">
+  <section class="cx-layer cx-hero">
+    <div class="cx-hero-copy"><h1>We protect transport safer across all industries</h1></div>
+    <div class="cx-hero-media">
+      <video muted="true" playsinline="true" webkit-playsinline="true" preload="auto" disablepictureinpicture="true" poster="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_211619_45cae3f3-ef0b-4c80-8102-d1b92a895304.png&w=1920&q=85"></video>
+    </div>
+  </section>
+  <section class="cx-layer cx-apps">
+    <div class="cx-scene is-on" data-i="0">
+      <img alt="" class="cx-bg" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195408_3baa90af-104c-4651-a954-4c32d032f447.png&w=1920&q=85"/>
+      <img alt="" class="cx-cable" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_205336_d8018410-76ae-4756-bce5-51737d6c83a2.png&w=1920&q=85"/>
+    </div>
+    <div class="cx-scene" data-i="1">
+      <img alt="" class="cx-bg" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195510_80256fb7-1e2d-4135-be89-85b9c9736604.png&w=1920&q=85"/>
+      <img alt="" class="cx-cable" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_205412_dea76893-5f89-4ef5-ad3f-6d5889502ed4.png&w=1920&q=85"/>
+    </div>
+    <div class="cx-scene" data-i="2">
+      <img alt="" class="cx-bg" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195543_44e0ac0c-4c7b-4a94-a8b0-935bd48a1503.png&w=1920&q=85"/>
+      <img alt="" class="cx-cable" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_205443_924891fc-e4fa-452d-a187-95614fdc06eb.png&w=1920&q=85"/>
+    </div>
+    <div class="cx-scene" data-i="3">
+      <img alt="" class="cx-bg" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195629_69f05c67-a2fe-4235-a5ff-233c0bdda517.png&w=1920&q=85"/>
+      <img alt="" class="cx-cable" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_205904_ad824661-4b68-42c0-b922-22b11ccff041.png&w=1920&q=85"/>
+    </div>
+    <div class="cx-scene" data-i="4">
+      <img alt="" class="cx-bg" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195701_5e5cb558-d608-44b3-81af-6098c19701f9.png&w=1920&q=85"/>
+      <img alt="" class="cx-cable" src="https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_210026_33e66723-2c92-4fa2-89ba-8da99891d131.png&w=1920&q=85"/>
+    </div>
+    <div class="cx-apps-ui">
+      <div class="cx-menu"></div>
+      <div class="cx-hotspot" aria-hidden="true"><i></i></div>
+      <article class="cx-card"></article>
+    </div>
+    <a class="cx-more" href="#">Learn more about…</a>
+  </section>
+</div>
+<div class="cx-track"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { setRoot: (el) => { if (el && !this._booted) { this._booted = true; this.boot(el); } } };
+  }
+
+  boot(rootEl) {
+    const video = rootEl.querySelector('.cx-hero-media video');
+    const heroLayer = rootEl.querySelector('.cx-hero');
+    const appsLayer = rootEl.querySelector('.cx-apps');
+    const track = rootEl.querySelector('.cx-track');
+    const menu = rootEl.querySelector('.cx-menu');
+    const card = rootEl.querySelector('.cx-card');
+    const more = rootEl.querySelector('.cx-more');
+    const btnFull = rootEl.querySelector('.cx-btn-full');
+    const btnOverview = rootEl.querySelector('.cx-btn-overview');
+    const boot = rootEl.querySelector('.cx-boot');
+    const bootBar = rootEl.querySelector('.cx-bar i');
+    const bootPct = rootEl.querySelector('.cx-boot p');
+    const scenes = Array.from(rootEl.querySelectorAll('.cx-scene'));
+
+    const VIDEO_URL = "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/77806b3d-8a1a-4df5-af52-0651710f8a85.mp4";
+    const APPS = [
+      { label: "Construction equipment", title: "Armatex CHG", more: "More about Armatex CHG",
+        thumb: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195408_3baa90af-104c-4651-a954-4c32d032f447.png&w=640&q=80",
+        specs: [{ k: "Service temperature", v: "\u221255\u00b0C to +200\u00b0C" }, { k: "Impact resistance", v: "LV 312-3 X < 25" }, { k: "Wear resistance", tag: "ISO 6722-1 CLASS 4" }] },
+      { label: "Electric & hybrid", title: "Armatex VHG10 Purple", more: "More about Armatex VHG10",
+        thumb: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195510_80256fb7-1e2d-4135-be89-85b9c9736604.png&w=640&q=80",
+        specs: [{ k: "Service temperature", v: "\u221270\u00b0C to +225\u00b0C (Peaks at +300\u00b0C)" }, { k: "Impact resistance", v: "LV 312-3 X < 25" }] },
+      { label: "Buses and trucks", title: "Flexline PS", more: "More about Flexline PS",
+        thumb: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195543_44e0ac0c-4c7b-4a94-a8b0-935bd48a1503.png&w=640&q=80",
+        colors: ["#111", "#e85a1a", "#f4f4f4", "#7a4aa8"],
+        specs: [{ k: "Service temperature", v: "\u221270\u00b0C to +150\u00b0C" }, { k: "Stretch ratio", v: "1:2" }, { k: "Wear resistance", tag: "ISO 6722-1 CLASS 4 (4,000 \u2013 14,999 CYCLES)" }] },
+      { label: "Rail systems", title: "Flexline RX", more: "More about Flexline RX",
+        thumb: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195629_69f05c67-a2fe-4235-a5ff-233c0bdda517.png&w=640&q=80",
+        specs: [{ k: "Service temperature", v: "\u221250\u00b0C to +180\u00b0C" }, { k: "Fire performance", v: "EN 45545-2 HL3" }, { k: "Shock rating", v: "IEC 61373 Category 1" }] },
+      { label: "Agricultural machines", title: "Armatex AG", more: "More about Armatex AG",
+        thumb: "https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20260906_195701_5e5cb558-d608-44b3-81af-6098c19701f9.png&w=640&q=80",
+        specs: [{ k: "Service temperature", v: "\u221240\u00b0C to +150\u00b0C" }, { k: "Dirt & moisture", v: "IP6K9K sealed jackets" }, { k: "Wear resistance", tag: "ISO 6722-1 CLASS 3" }] }
+    ];
+
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+    const range = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
+    const MOBILE_BP = 900;
+    const STEPS = APPS.length - 1;
+
+    let heroTarget = 0, seekAt = 0, dur = 6, ready = false, raf = 0, index = -1, wheelLock = false;
+    let vh = innerHeight, lastW = innerWidth;
+    let heroLen = 0, fadeLen = 0, appsLen = 0, appsStart = 0;
+
+    function layout(force) {
+      const h = Math.max(1, innerHeight);
+      if (!force && innerWidth === lastW && Math.abs(h - vh) < 120) return;
+      vh = h; lastW = innerWidth;
+      document.documentElement.style.setProperty('--vh', h + 'px');
+      heroLen = 4.4 * vh; fadeLen = 1.0 * vh; appsLen = 1.0 * STEPS * vh; appsStart = heroLen + fadeLen;
+      track.style.height = (appsStart + appsLen + vh) + 'px';
+    }
+
+    const opts = [];
+    APPS.forEach((item, i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'cx-opt' + (i === 0 ? ' is-on' : '');
+      b.innerHTML = item.label + '<img alt="" src="' + item.thumb + '">';
+      b.addEventListener('click', () => setIndex(i, false));
+      menu.appendChild(b); opts.push(b);
+    });
+
+    let started = false, attached = false;
+    function setBootProgress(fraction) {
+      bootBar.style.transform = 'scaleX(' + fraction + ')';
+      bootPct.textContent = 'LOADING ' + Math.round(fraction * 100) + '%';
+    }
+    function start() {
+      if (started) return; started = true; ready = true;
+      boot.classList.add('done');
+      heroTarget = clamp((scrollY || 0) / heroLen, 0, 1); seekAt = heroTarget * dur;
+      renderCard(0); paintUI();
+    }
+    function attach(src) {
+      if (attached) return; attached = true;
+      video.addEventListener('loadedmetadata', () => {
+        dur = isFinite(video.duration) && video.duration > 0 ? video.duration : 6;
+        video.pause();
+        heroTarget = clamp((scrollY || 0) / heroLen, 0, 1); seekAt = heroTarget * dur;
+        try { video.currentTime = seekAt; } catch (e) {}
+      });
+      ['loadeddata', 'canplaythrough', 'error'].forEach((ev) => video.addEventListener(ev, start));
+      video.src = src; video.load();
+      setTimeout(start, 12000);
+    }
+    function preload() {
+      const ctrl = ('AbortController' in window) ? new AbortController() : null;
+      const bail = setTimeout(() => { if (attached) return; if (ctrl) ctrl.abort(); setBootProgress(1); attach(VIDEO_URL); }, 15000);
+      fetch(VIDEO_URL, ctrl ? { signal: ctrl.signal } : undefined).then((res) => {
+        if (!res.ok || !res.body) throw new Error('bad response');
+        const total = Number(res.headers.get('content-length')) || 0;
+        const reader = res.body.getReader();
+        const chunks = []; let got = 0;
+        function pump() {
+          return reader.read().then(({ done, value }) => {
+            if (done) return new Blob(chunks, { type: 'video/mp4' });
+            chunks.push(value); got += value.length;
+            setBootProgress(total ? got / total : Math.min(got / 6.5e6, 0.95));
+            return pump();
+          });
+        }
+        return pump();
+      }).then((blob) => { clearTimeout(bail); setBootProgress(1); attach(URL.createObjectURL(blob)); })
+        .catch(() => { clearTimeout(bail); setBootProgress(1); attach(VIDEO_URL); });
+    }
+    function unlock() {
+      const p = video.play();
+      if (p && p.then) p.then(() => video.pause()).catch(() => {}); else video.pause();
+    }
+    ["touchstart", "pointerdown", "wheel", "keydown"].forEach((ev) => addEventListener(ev, unlock, { once: true, passive: true }));
+
+    function renderCard(i) {
+      const item = APPS[i];
+      let html = '<h2>' + item.title + '</h2>';
+      item.specs.forEach((s) => {
+        html += '<div class="cx-spec"><b></b><div><small>' + s.k + '</small>' + (s.tag ? '<span class="cx-tag">' + s.tag + '</span>' : '<span>' + s.v + '</span>') + '</div></div>';
+      });
+      if (item.colors) {
+        html += '<div class="cx-spec"><b></b><div><small>Supplied in</small><div class="cx-swatches">' + item.colors.map((c) => '<i style="background:' + c + '"></i>').join('') + '</div></div></div>';
+      }
+      card.innerHTML = html;
+      more.textContent = item.more;
+    }
+
+    function setIndex(i, fromScroll) {
+      if (!Number.isFinite(i)) return;
+      const next = clamp(i, 0, STEPS);
+      if (next !== index) {
+        index = next;
+        scenes.forEach((s) => s.classList.toggle('is-on', Number(s.dataset.i) === index));
+        opts.forEach((o, oi) => o.classList.toggle('is-on', oi === index));
+        renderCard(index);
+        if (innerWidth <= MOBILE_BP) {
+          const a = opts[index].getBoundingClientRect(); const m = menu.getBoundingClientRect();
+          menu.scrollBy({ left: (a.left + a.width / 2) - (m.left + m.width / 2), behavior: 'smooth' });
+        }
+      }
+      if (!fromScroll) scrollTo({ top: appsStart + (index / STEPS) * appsLen, behavior: 'smooth' });
+    }
+
+    let lastFade = -1, lastOnApps = null;
+    function paintUI() {
+      const y = scrollY || pageYOffset;
+      const fadeP = range(y, heroLen, appsStart);
+      if (fadeP !== lastFade) {
+        lastFade = fadeP;
+        heroLayer.style.opacity = 1 - fadeP; appsLayer.style.opacity = fadeP;
+        heroLayer.style.visibility = fadeP === 1 ? 'hidden' : 'visible';
+        appsLayer.style.visibility = fadeP === 0 ? 'hidden' : 'visible';
+      }
+      setIndex(Math.round(range(y, appsStart, appsStart + appsLen) * STEPS), true);
+      const onApps = fadeP > 0.5;
+      if (onApps !== lastOnApps) {
+        lastOnApps = onApps;
+        btnFull.classList.toggle('is-on', !onApps);
+        btnOverview.classList.toggle('is-on', onApps);
+      }
+    }
+
+    function frame() {
+      if (ready && dur) {
+        const gap = heroTarget * dur - seekAt;
+        if (Math.abs(gap) > 0.0008) {
+          seekAt += gap * 0.115;
+          if (video.readyState >= 2 && !video.seeking) { try { video.currentTime = seekAt; } catch (e) {} }
+        }
+      }
+      paintUI();
+      raf = requestAnimationFrame(frame);
+    }
+
+    addEventListener('scroll', () => { heroTarget = clamp((scrollY || 0) / heroLen, 0, 1); }, { passive: true });
+    addEventListener('resize', () => { layout(false); heroTarget = clamp((scrollY || 0) / heroLen, 0, 1); });
+    addEventListener('orientationchange', () => { layout(true); heroTarget = clamp((scrollY || 0) / heroLen, 0, 1); });
+
+    function inAppsZone() { const y = scrollY || pageYOffset; return y >= appsStart - 1 && y <= appsStart + appsLen + 1; }
+
+    addEventListener('wheel', (e) => {
+      if (!inAppsZone() || wheelLock) return;
+      const down = e.deltaY > 0;
+      if ((down && index >= STEPS) || (!down && index <= 0)) return;
+      e.preventDefault(); wheelLock = true; setIndex(index + (down ? 1 : -1), false);
+      setTimeout(() => { wheelLock = false; }, 620);
+    }, { passive: false });
+
+    let touchStartY = 0, touchStartX = 0;
+    addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; }, { passive: true });
+    addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0]; const dy = touchStartY - t.clientY; const dx = Math.abs(touchStartX - t.clientX);
+      if (Math.abs(dy) < 40 || dx > 60 || !inAppsZone()) return;
+      const down = dy > 0;
+      if ((down && index >= STEPS) || (!down && index <= 0)) return;
+      setIndex(index + (down ? 1 : -1), false);
+    }, { passive: true });
+
+    btnFull.addEventListener('click', () => scrollTo({ top: 0, behavior: 'smooth' }));
+    btnOverview.addEventListener('click', () => scrollTo({ top: appsStart, behavior: 'smooth' }));
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(raf); else raf = requestAnimationFrame(frame);
+    });
+
+    video.pause();
+    video.muted = true;
+    layout(true);
+    renderCard(0);
+    paintUI();
+    preload();
+    raf = requestAnimationFrame(frame);
+    // ref-callback fires before the host finishes sizing the mounted container,
+    // so the first innerHeight read can be bogus (near 0) — self-correct shortly after.
+    setTimeout(() => { layout(true); heroTarget = clamp((scrollY || 0) / heroLen, 0, 1); paintUI(); }, 250);
+  }
+}
+</script>
+</body>
+</html>
