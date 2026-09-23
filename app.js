@@ -358,7 +358,7 @@
         else link.removeAttribute('aria-current');
       });});
     }, {rootMargin:'-20% 0px -60%'});
-    ['servicios','soluciones','proyectos','nosotros','contacto','vision','proceso','inicio'].forEach(id => sectionObserver.observe(document.getElementById(id)));
+    ['servicios','soluciones','demo-turnos','proyectos','nosotros','contacto','vision','proceso','inicio'].forEach(id => sectionObserver.observe(document.getElementById(id)));
   }
 
   // Keep the standard pointer; use a contextual companion only over project previews.

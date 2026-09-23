@@ -63,8 +63,9 @@
           height="868"
       /></a>
       <nav class="desktop-nav" aria-label="Navegación principal">
-        <a href="#servicios">Qué hacemos</a><a href="#proyectos">Proyectos</a
-        ><a href="#nosotros">Nosotros</a>
+        <a href="#servicios">Qué hacemos</a
+        ><a class="nav-featured" href="#demo-turnos">Demo turnos</a
+        ><a href="#proyectos">Proyectos</a><a href="#nosotros">Nosotros</a>
       </nav>
       <a class="header-contact" href="#contacto"
         >Hablemos <span aria-hidden="true">↗</span></a
@@ -86,10 +87,12 @@
       hidden
     >
       <a href="#servicios"><small>01</small>Qué hacemos</a
-      ><a href="#proyectos"><small>02</small>Proyectos</a
-      ><a href="#proceso"><small>03</small>Proceso</a
-      ><a href="#nosotros"><small>04</small>Nosotros</a
-      ><a href="#contacto"><small>05</small>Hablemos ↗</a>
+      ><a class="nav-featured" href="#demo-turnos"
+        ><small>02</small>Demo turnos</a
+      ><a href="#proyectos"><small>03</small>Proyectos</a
+      ><a href="#proceso"><small>04</small>Proceso</a
+      ><a href="#nosotros"><small>05</small>Nosotros</a
+      ><a href="#contacto"><small>06</small>Hablemos ↗</a>
       <p>TANDIL / ARGENTINA</p>
     </nav>
     <main id="contenido">
@@ -364,6 +367,123 @@
               <i></i><b>+</b>
             </div>
             <span>FUNCIÓN</span>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="featured section-pad"
+        id="demo-turnos"
+        aria-labelledby="featured-title"
+      >
+        <div class="featured-glow" aria-hidden="true"></div>
+        <div class="featured-inner">
+          <div class="featured-copy">
+            <p class="eyebrow featured-eyebrow">
+              <span class="live-dot" aria-hidden="true"></span> PRODUCTO
+              DESTACADO <span class="cyan">/</span> DEMO EN VIVO
+            </p>
+            <h2 id="featured-title" data-reveal>
+              Turnos que se<br />confirman <em>solos.</em>
+            </h2>
+            <p class="featured-lead" data-reveal>
+              Un sistema que avisa cada turno por WhatsApp, recibe la respuesta
+              del paciente y actualiza la agenda al instante. Sin llamados, sin
+              planillas, sin perder la mañana contestando mensajes.
+            </p>
+            <ul class="featured-list" data-reveal>
+              <li>
+                <span aria-hidden="true">01</span>
+                <div>
+                  <b>Recordatorios automáticos</b>
+                  <p>Cada persona recibe el aviso a tiempo, sin que nadie lo escriba.</p>
+                </div>
+              </li>
+              <li>
+                <span aria-hidden="true">02</span>
+                <div>
+                  <b>Confirma o reprograma respondiendo</b>
+                  <p>La agenda se actualiza sola con la respuesta del paciente.</p>
+                </div>
+              </li>
+              <li>
+                <span aria-hidden="true">03</span>
+                <div>
+                  <b>Lista de espera</b>
+                  <p>Si alguien cancela, el horario se ofrece al que estaba esperando.</p>
+                </div>
+              </li>
+            </ul>
+            <div class="featured-actions" data-reveal>
+              <a
+                class="featured-cta magnetic"
+                href="demo-turnos/demo_turnos_whatsapp_nami.html"
+                target="_blank"
+                rel="noopener"
+                >PROBAR LA DEMO <span aria-hidden="true">↗</span></a
+              >
+              <a class="text-link featured-secondary" href="#contacto"
+                >Quiero esto en mi negocio <span aria-hidden="true">↗</span></a
+              >
+            </div>
+            <p class="featured-note">
+              Demo interactiva con datos ficticios. Se adapta a consultorios,
+              estudios, salones y talleres.
+            </p>
+          </div>
+          <div class="featured-demo" data-reveal>
+            <div class="demo-stage" aria-hidden="true">
+              <div class="demo-phone">
+                <div class="demo-phone-top">
+                  <i class="demo-avatar">N</i>
+                  <div class="demo-phone-id">
+                    <b>Consultorio</b><small>en línea</small>
+                  </div>
+                </div>
+                <div class="demo-chat">
+                  <div class="demo-msg msg-bot m1">
+                    Hola Martina 👋 Te recordamos tu turno del
+                    <b>miércoles 23 a las 09:00</b> — Limpieza.
+                    <span class="demo-quick"
+                      ><i>1 · Confirmar</i><i>2 · Reprogramar</i></span
+                    >
+                    <span class="demo-time">09:02</span>
+                  </div>
+                  <div class="demo-msg msg-me m2">
+                    1 <span class="demo-time">09:04 ✓✓</span>
+                  </div>
+                  <div class="demo-typing"><i></i><i></i><i></i></div>
+                  <div class="demo-msg msg-bot m3">
+                    ¡Listo! Tu turno quedó <b>confirmado</b> ✅ Te esperamos.
+                    <span class="demo-time">09:04</span>
+                  </div>
+                </div>
+              </div>
+              <div class="demo-agenda">
+                <div class="demo-agenda-head">
+                  <span>AGENDA · MIÉ 23</span><em>EN VIVO</em>
+                </div>
+                <div class="demo-row is-active">
+                  <b>09:00</b><span>Martina Gómez</span>
+                  <span class="demo-status"
+                    ><i class="st st-wait">Pendiente</i
+                    ><i class="st st-ok">Confirmado</i></span
+                  >
+                </div>
+                <div class="demo-row">
+                  <b>09:45</b><span>Lucía Fernández</span>
+                  <span class="demo-status"
+                    ><i class="st st-ok is-static">Confirmado</i></span
+                  >
+                </div>
+                <div class="demo-row">
+                  <b>10:30</b><span>Julián Pereyra</span>
+                  <span class="demo-status"
+                    ><i class="st st-wait is-static">Pendiente</i></span
+                  >
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
