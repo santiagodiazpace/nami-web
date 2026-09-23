@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAMI · Showcase turnos por WhatsApp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --cyan:#00AFFF; --ink:#000; --bg:#F8F8F6; }
+  *{ box-sizing:border-box; margin:0; padding:0 }
+  html,body{ width:100%; height:100%; background:var(--bg); overflow:hidden }
+
+  /* Stage fijo 1920×1080 que escala al navegador */
+  #stage{ position:absolute; left:50%; top:50%; width:1920px; height:1080px;
+    transform-origin:50% 50%; background:var(--bg); overflow:hidden;
+    font-family:Inter, system-ui, sans-serif; color:var(--ink) }
+
+  /* Fondo: blanco roto + grilla muy tenue en los bordes + glow cyan mínimo */
+  .bg-grid{ position:absolute; inset:0;
+    background-image:linear-gradient(rgba(0,0,0,.045) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(0,0,0,.045) 1px,transparent 1px);
+    background-size:80px 80px; background-position:0 50px;
+    -webkit-mask-image:radial-gradient(ellipse 62% 64% at 50% 50%,transparent 62%,#000 100%);
+            mask-image:radial-gradient(ellipse 62% 64% at 50% 50%,transparent 62%,#000 100%) }
+  .bg-glow{ position:absolute; left:50%; top:52%; width:1900px; height:1000px; transform:translate(-50%,-50%);
+    background:radial-gradient(closest-side,rgba(0,175,255,.07),rgba(0,175,255,0)) }
+
+  /* Chrome superior */
+  .chrome{ position:absolute; top:66px; display:flex; align-items:center; gap:14px; opacity:0 }
+  #chrome-l{ left:240px }
+  #chrome-r{ right:240px; gap:12px }
+  .wm svg{ height:19px; width:auto; display:block; fill:#000 }
+  .sep{ width:1px; height:16px; background:rgba(0,0,0,.18) }
+  .lbl{ font:500 14px/1 Outfit, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#707070 }
+  .lbl b{ display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--cyan); margin-right:9px; vertical-align:2px }
+  #scn{ display:flex; align-items:baseline; gap:12px; transition:opacity .45s ease, transform .45s ease }
+  #scn.swap{ opacity:0; transform:translateY(4px); transition:none }
+  #scn .n{ font:600 14px/1 Outfit, sans-serif; letter-spacing:.08em; color:#000; font-variant-numeric:tabular-nums }
+  #scn .o{ font:500 14px/1 Outfit, sans-serif; letter-spacing:.08em; color:#A0A0A0 }
+  #scn .nm{ font:500 14px/1 Outfit, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:#707070; margin-left:6px }
+
+  /* Marco del producto: ventana muy sutil */
+  #frame{ position:absolute; left:240px; top:128px; width:1440px; height:846px; border-radius:16px;
+    background:#fff; overflow:hidden; opacity:0; will-change:transform,opacity,filter;
+    box-shadow:0 0 0 1px rgba(0,0,0,.065), 0 2px 4px rgba(0,0,0,.03), 0 44px 96px -34px rgba(0,30,60,.24) }
+  .bar{ height:36px; border-bottom:1px solid rgba(0,0,0,.06); display:flex; align-items:center; gap:7px; padding-left:18px; background:#fff }
+  .bar i{ width:10px; height:10px; border-radius:50%; background:#E7E7E7 }
+  #view{ position:absolute; left:0; top:36px; width:1440px; height:810px; overflow:hidden; background:#fff }
+  .layer{ position:absolute; left:0; top:0; transform-origin:0 0; will-change:transform,opacity; visibility:hidden }
+  .layer img{ display:block; width:100%; height:100%; user-select:none }
+  .patch{ position:absolute; background-repeat:no-repeat }
+
+  /* Overlays de foco (en coordenadas del frame) */
+  #ov{ position:absolute; inset:0; pointer-events:none; overflow:hidden }
+  .hl{ position:absolute; left:0; top:0; border-radius:10px; opacity:0; transform-origin:0 0; will-change:transform,opacity }
+  .hl.focus{ border:2px solid var(--cyan); box-shadow:0 0 0 5px rgba(0,175,255,.14) }
+  .hl.soft{ border:1.5px solid rgba(0,175,255,.55); background:rgba(0,175,255,.045) }
+  .hl.muted{ border:1.5px dashed rgba(0,0,0,.32) }
+  .hl.gap{ border:2px dashed var(--cyan); background:rgba(0,175,255,.05) }
+  .hl.dim.focus{ box-shadow:0 0 0 5px rgba(0,175,255,.14), 0 0 0 4000px rgba(10,14,18,.10) }
+  .hl.dim.gap{ box-shadow:0 0 0 4000px rgba(10,14,18,.10) }
+  .hl .chk{ position:absolute; right:-14px; top:-14px; width:30px; height:30px; border-radius:50%;
+    background:var(--cyan); display:grid; place-items:center; transform:scale(0); opacity:0;
+    box-shadow:0 6px 16px -4px rgba(0,175,255,.55) }
+  .hl .chk svg{ width:15px; height:15px }
+
+  /* Cursor */
+  #cursor{ position:absolute; left:0; top:0; width:26px; height:26px; opacity:0; transform-origin:3px 2px; will-change:transform,opacity;
+    filter:drop-shadow(0 3px 6px rgba(0,0,0,.22)) }
+  #ripple{ position:absolute; left:0; top:0; width:64px; height:64px; margin:-32px 0 0 -32px; border-radius:50%;
+    border:2px solid rgba(0,175,255,.5); background:rgba(0,175,255,.12); opacity:0 }
+
+  /* Captions */
+  .cap{ position:absolute; opacity:0; will-change:transform,opacity }
+  .cap.bl{ left:168px; bottom:118px }
+  .cap.br{ right:168px; bottom:118px }
+  .cap .card{ background:#000; color:#fff; border-radius:16px; padding:26px 34px 28px;
+    box-shadow:0 30px 64px -26px rgba(0,0,0,.45) }
+  .cap .ln{ width:28px; height:3px; border-radius:2px; background:var(--cyan); margin-bottom:16px }
+  .cap .t{ font:600 40px/1.1 Sora, sans-serif; letter-spacing:-.025em; white-space:nowrap }
+  .cap .t em{ font-style:normal; color:var(--cyan) }
+  .cap .s{ font:400 20px/1.4 Inter, sans-serif; color:rgba(255,255,255,.62); margin-top:10px; white-space:nowrap }
+  .cap.kicker .card{ background:#fff; color:#000; border-radius:999px; padding:15px 24px 15px 20px;
+    display:flex; align-items:center; gap:12px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.08), 0 18px 40px -20px rgba(0,0,0,.28) }
+  .cap.kicker .dot{ width:8px; height:8px; border-radius:50%; background:var(--cyan) }
+  .cap.kicker .t{ font:500 21px/1 Outfit, sans-serif; letter-spacing:.01em }
+
+  /* Progreso */
+  #prog{ position:absolute; left:240px; right:240px; bottom:50px; height:2px; background:rgba(0,0,0,.07); border-radius:2px; opacity:0 }
+  #prog b{ position:absolute; left:0; top:0; bottom:0; width:0; background:var(--cyan); border-radius:2px }
+  #prog i{ position:absolute; top:-2px; width:2px; height:6px; margin-left:-1px; border-radius:1px; background:rgba(0,0,0,.14) }
+
+  /* Cierre */
+  #end{ position:absolute; inset:0; display:grid; place-items:center; opacity:0; pointer-events:none }
+  #end .in{ display:flex; flex-direction:column; align-items:center }
+  #end .wm svg{ height:78px }
+  #end .ln{ width:56px; height:3px; border-radius:2px; background:var(--cyan); margin:38px 0 26px }
+  #end .tag{ font:500 22px/1 Outfit, sans-serif; letter-spacing:.04em; color:#5E5E5E }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg-glow"></div>
+  <div class="bg-grid"></div>
+
+  <div class="chrome" id="chrome-l">
+    <span class="wm"><svg aria-label="NAMI" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3120 868"><g transform="translate(0 666) scale(1 -1)"><path transform="translate(0 0)" d="M50 666l151 0c0,-42.6669 7.0012,-80.3339 20.9996,-112.999 14.0004,-32.6669 35.3339,-64.6681 64.0004,-96.0016 24.6661,-26.6653 54.0004,-52.8329 88.0008,-78.4986 34.0004,-25.6677 76.6653,-55.4998 127.999,-89.5002 3.33467,-2.0012 8.0008,-5 14.0004,-9.0004 94.6661,-62.6669 162.667,-113.667 204,-153.001l0 539 151 0 0 -866 -151 0c0,40 -6.83327,75.3339 -20.4998,106 -13.6665,30.6677 -34.8341,60.9996 -63.5006,90.9996 -16.6653,18.0008 -37.9988,37.1671 -64.0004,57.501 -25.9996,20.3339 -48.9984,37.499 -68.9984,51.4994 -20,14.0004 -48.0008,33.0008 -84.0004,57.0012 -34.0004,21.9992 -59.8341,38.9984 -77.501,50.9996 -17.6669,11.9992 -40.3319,28.8325 -67.9988,50.4998 -27.6669,21.6673 -51.8333,42.499 -72.501,62.499l0 -526.999 -151 0 0 866z"/><path transform="translate(920.0 0)" d="M380 666l161.999 0 329 -867.999 -161.999 0 -70.9996 187.999c-14.6681,-1.9992 -30,-3.33267 -46.0016,-4.0004 -15.9996,-0.665734 -30,-1.16553 -41.9992,-1.4994 -11.9992,-0.333866 -26.9992,0 -45,0.9996 -18.0008,1.0016 -31.3335,1.83327 -40,2.501 -8.66653,0.665734 -22.8329,2.16713 -42.501,4.5002 -19.6661,2.33307 -32.499,4.0004 -38.4986,5 -5.9996,0.9996 -20,3.16673 -42.0012,6.4994 -21.9992,3.33267 -35,5 -38.9984,5 -4.0004,0.665734 -8.0008,1.33347 -12.0012,1.9992l-79.0004 -208.998 -161.999 0 330 867.999zm201.999 -532.999l-121 320 -115 -301.002c38.6665,-5.9996 67.1671,-10.1659 85.4998,-12.499 18.3347,-2.33307 42.0012,-4.33427 70.9996,-5.9996 29.0004,-1.66733 55.5018,-1.83327 79.5002,-0.4998z"/><path transform="translate(1840.0 0)" d="M50 666l151 0c0,-48.6665 15.3339,-100.166 45.9996,-154.5 30.6677,-54.3323 75,-117.833 133.001,-190.5 5.33387,-6.66533 16.4994,-20.4998 33.5006,-41.4994 16.9992,-20.9996 29.6661,-36.8333 37.9988,-47.501 8.33467,-10.6657 18.8345,-24.5002 31.5014,-41.4994 12.6649,-16.9992 23.6665,-32.8329 32.9988,-47.499 9.33427,14.6661 20.1679,30.4998 32.501,47.499 12.3331,16.9992 22.8329,30.8337 31.4994,41.4994 8.66653,10.6677 21.3335,26.5014 38.0008,47.501 16.6653,20.9996 27.9988,34.8341 33.9984,41.4994 57.3351,72.6669 101.333,136.168 132.001,190.5 30.6657,54.3343 45.9996,105.834 45.9996,154.5l151 0 0 -866 -151 0 0 504c-13.3327,-17.3331 -33.3327,-43.0008 -60,-77.0012 -58.6665,-73.3327 -103.167,-134.5 -133.501,-183.499 -30.3319,-49.0004 -45.4998,-91.1675 -45.4998,-126.501l-151 0c0,35.3339 -15.1659,77.501 -45.4998,126.501 -30.3339,48.9984 -74.5002,110.166 -132.501,183.499 -27.3331,34.0004 -47.6649,59.6681 -60.9996,77.0012l0 -504 -151 0 0 866z"/><path transform="translate(2870.0 0)" d="M50 666l151 0 0 -866 -151 0 0 866z"/></g></svg></span><span class="sep"></span>
+    <span class="lbl"><b></b>Demo</span>
+  </div>
+  <div class="chrome" id="chrome-r">
+    <div id="scn"><span class="n">01</span><span class="o">/ 08</span><span class="nm">Presentación</span></div>
+  </div>
+
+  <div id="frame">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div id="view">
+      <div id="ov">
+        <div id="ripple"></div>
+        <svg id="cursor" viewBox="0 0 26 26" aria-hidden="true">
+          <path d="M3 2.2 L3 20.6 L8.1 15.9 L11.4 23.2 L14.6 21.8 L11.4 14.7 L18.4 14.7 Z" fill="#000" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="caps"></div>
+  <div id="prog"><b></b></div>
+
+  <div id="end"><div class="in">
+    <span class="wm"><svg aria-label="NAMI" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3120 868"><g transform="translate(0 666) scale(1 -1)"><path transform="translate(0 0)" d="M50 666l151 0c0,-42.6669 7.0012,-80.3339 20.9996,-112.999 14.0004,-32.6669 35.3339,-64.6681 64.0004,-96.0016 24.6661,-26.6653 54.0004,-52.8329 88.0008,-78.4986 34.0004,-25.6677 76.6653,-55.4998 127.999,-89.5002 3.33467,-2.0012 8.0008,-5 14.0004,-9.0004 94.6661,-62.6669 162.667,-113.667 204,-153.001l0 539 151 0 0 -866 -151 0c0,40 -6.83327,75.3339 -20.4998,106 -13.6665,30.6677 -34.8341,60.9996 -63.5006,90.9996 -16.6653,18.0008 -37.9988,37.1671 -64.0004,57.501 -25.9996,20.3339 -48.9984,37.499 -68.9984,51.4994 -20,14.0004 -48.0008,33.0008 -84.0004,57.0012 -34.0004,21.9992 -59.8341,38.9984 -77.501,50.9996 -17.6669,11.9992 -40.3319,28.8325 -67.9988,50.4998 -27.6669,21.6673 -51.8333,42.499 -72.501,62.499l0 -526.999 -151 0 0 866z"/><path transform="translate(920.0 0)" d="M380 666l161.999 0 329 -867.999 -161.999 0 -70.9996 187.999c-14.6681,-1.9992 -30,-3.33267 -46.0016,-4.0004 -15.9996,-0.665734 -30,-1.16553 -41.9992,-1.4994 -11.9992,-0.333866 -26.9992,0 -45,0.9996 -18.0008,1.0016 -31.3335,1.83327 -40,2.501 -8.66653,0.665734 -22.8329,2.16713 -42.501,4.5002 -19.6661,2.33307 -32.499,4.0004 -38.4986,5 -5.9996,0.9996 -20,3.16673 -42.0012,6.4994 -21.9992,3.33267 -35,5 -38.9984,5 -4.0004,0.665734 -8.0008,1.33347 -12.0012,1.9992l-79.0004 -208.998 -161.999 0 330 867.999zm201.999 -532.999l-121 320 -115 -301.002c38.6665,-5.9996 67.1671,-10.1659 85.4998,-12.499 18.3347,-2.33307 42.0012,-4.33427 70.9996,-5.9996 29.0004,-1.66733 55.5018,-1.83327 79.5002,-0.4998z"/><path transform="translate(1840.0 0)" d="M50 666l151 0c0,-48.6665 15.3339,-100.166 45.9996,-154.5 30.6677,-54.3323 75,-117.833 133.001,-190.5 5.33387,-6.66533 16.4994,-20.4998 33.5006,-41.4994 16.9992,-20.9996 29.6661,-36.8333 37.9988,-47.501 8.33467,-10.6657 18.8345,-24.5002 31.5014,-41.4994 12.6649,-16.9992 23.6665,-32.8329 32.9988,-47.499 9.33427,14.6661 20.1679,30.4998 32.501,47.499 12.3331,16.9992 22.8329,30.8337 31.4994,41.4994 8.66653,10.6677 21.3335,26.5014 38.0008,47.501 16.6653,20.9996 27.9988,34.8341 33.9984,41.4994 57.3351,72.6669 101.333,136.168 132.001,190.5 30.6657,54.3343 45.9996,105.834 45.9996,154.5l151 0 0 -866 -151 0 0 504c-13.3327,-17.3331 -33.3327,-43.0008 -60,-77.0012 -58.6665,-73.3327 -103.167,-134.5 -133.501,-183.499 -30.3319,-49.0004 -45.4998,-91.1675 -45.4998,-126.501l-151 0c0,35.3339 -15.1659,77.501 -45.4998,126.501 -30.3339,48.9984 -74.5002,110.166 -132.501,183.499 -27.3331,34.0004 -47.6649,59.6681 -60.9996,77.0012l0 -504 -151 0 0 866z"/><path transform="translate(2870.0 0)" d="M50 666l151 0 0 -866 -151 0 0 866z"/></g></svg></span>
+    <span class="ln"></span>
+    <span class="tag">Automatización de turnos por WhatsApp</span>
+  </div></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   CONFIG
+   ════════════════════════════════════════════════════════════════ */
+const LOOP = false;          // true → reinicia al terminar
+const START_DELAY = 0.8;     // segundos antes de arrancar
+const LOOP_GAP = 1.2;        // pausa sobre el cierre antes de reiniciar (si LOOP)
+const FW = 1440, FH = 810;   // viewport del producto dentro del marco
+
+// ?embed → la maneja la web (play/pause por postMessage), loop activado y cuadro fijo antes de arrancar
+const EMBED = new URLSearchParams(location.search).has('embed');
+const POSTER_T = 37.5;       // cuadro que se ve en pausa antes del primer play (Horario recuperado)
+
+/* Capturas. Coordenadas en px CSS de cada captura.
+   ui  = factor para que la UI se vea al mismo tamaño en todas (las capturas tienen distinto zoom).
+   dpr = 2 si las reemplazás por capturas retina con el mismo encuadre (las coordenadas no cambian). */
+const IMAGES = {
+  inicio:         { src:'assets/01-inicio.png',         ui:1.36,  dpr:1 },
+  recordatorios:  { src:'assets/02-recordatorios.png',  ui:0.896, dpr:1 },
+  confirmacion:   { src:'assets/03-confirmacion.png',   ui:1,     dpr:1 },
+  reprogramacion: { src:'assets/04-reprogramacion.png', ui:1,     dpr:1 },
+  cancelacion:    { src:'assets/05-cancelacion.png',    ui:1,     dpr:1 },
+  espera:         { src:'assets/06-lista-espera.png',   ui:1,     dpr:1 },
+  resultado:      { src:'assets/07-resultado.png',      ui:1.125, dpr:1 },
+};
+
+/* ════════════════════════════════════════════════════════════════
+   TIMELINE — todos los tiempos en segundos, relativos al inicio de cada escena.
+   dur         duración de la escena.
+   shots       capturas en pantalla. cam = [t, x, y, zoom, 'free'?]  (x,y = punto de la captura que va al centro).
+               cont:true → continúa la toma anterior sin corte. fade = crossfade de entrada.
+   highlights  rect [x,y,w,h] sobre la captura, t [desde, hasta]. style: focus | soft | muted | gap. dim oscurece el resto.
+   cursor      path [t,x,y] sobre una captura + clicks [t].
+   captions    texto comercial. pos: bl | br.
+   ════════════════════════════════════════════════════════════════ */
+const scenes = [
+  { id:'intro', name:'Presentación', dur:3.2,
+    shots:[{ img:'inicio', fade:0, cam:[[0,573,360,0.92],[3.2,573,360,0.94]] }],
+    captions:[{ t:[0.9,3.4], style:'kicker', pos:'bl', title:'Automatización de turnos por WhatsApp' }],
+  },
+
+  { id:'recordatorios', name:'Recordatorios', dur:4.4,
+    shots:[
+      { img:'inicio', cont:true, cam:[[1.1,420,330,1.0]] },
+      { img:'recordatorios', at:2.2, fade:0.7, cam:[[2.2,670,496,1.2],[3.5,737,600,1.08],[4.4,737,600,1.1]] },
+    ],
+    highlights:[
+      { img:'inicio', rect:[124,203,410,40], t:[0.7,1.7], style:'soft' },
+      { img:'inicio', rect:[579,289,111,25], t:[1.5,2.4] },
+      { img:'recordatorios', rect:[680,441,201,38], t:[2.9,4.4], style:'soft' },
+      { img:'recordatorios', rect:[65,594,325,18], t:[3.2,4.4], style:'soft', pad:4 },
+    ],
+    cursor:{ img:'inicio', path:[[1.0,820,430],[1.9,634,302]], clicks:[2.0] },
+    captions:[{ t:[2.5,4.6], pos:'bl', title:'Recordatorios automáticos', sub:'Sin escribir paciente por paciente.' }],
+  },
+
+  { id:'confirmacion', name:'Confirmación', dur:6.2,
+    shots:[
+      { img:'recordatorios', cont:true, cam:[[1.1,1100,700,1.25]] },
+      { img:'confirmacion', at:2.0, fade:0.6, cam:[
+        [2.0,771,251,1.25,'free'],[2.3,771,251,1.25,'free'],[3.1,800,330,1.25,'free'],[3.4,800,330,1.25,'free'],
+        [4.4,640,390,1.12],[6.2,640,395,1.13]] },
+    ],
+    highlights:[
+      { img:'recordatorios', rect:[952,794,100,31], t:[1.1,2.1] },
+      { img:'confirmacion', rect:[876,490,100,26], t:[2.7,3.8], style:'soft' },
+      { img:'confirmacion', rect:[1128,525,88,40], t:[2.7,3.8] },
+      { img:'confirmacion', rect:[127,425,223,47], t:[4.4,6.2] },
+      { img:'confirmacion', rect:[80,226,110,46], t:[4.9,6.2], style:'soft' },
+    ],
+    cursor:{ img:'recordatorios', path:[[0.9,890,660],[1.7,1002,810]], clicks:[1.8] },
+    captions:[{ t:[2.4,6.0], pos:'bl', title:'Confirman con un toque' }],
+  },
+
+  { id:'reprogramacion', name:'Reprogramación', dur:6.8,
+    shots:[
+      { img:'confirmacion', cont:true, cam:[[0.9,1000,300,1.2]] },
+      { img:'reprogramacion', at:1.5, fade:0.6, cam:[
+        [1.5,891,343,1.2],[1.9,891,343,1.2],[2.8,1100,520,1.25],[4.1,1100,520,1.25],
+        [5.2,560,560,1.25],[6.8,560,562,1.26]] },
+    ],
+    highlights:[
+      { img:'confirmacion', rect:[953,196,88,27], t:[0.7,1.6] },
+      { img:'reprogramacion', rect:[1140,473,148,40], t:[2.8,3.6] },
+      { img:'reprogramacion', rect:[961,588,160,24], t:[3.4,4.3], style:'soft' },
+      { img:'reprogramacion', rect:[1163,622,125,40], t:[3.4,4.3] },
+      { img:'reprogramacion', rect:[211,539,223,48], t:[5.1,6.8], style:'muted' },
+      { img:'reprogramacion', rect:[442,485,224,48], t:[5.5,6.8] },
+    ],
+    cursor:{ img:'confirmacion', path:[[0.3,1060,340],[1.1,997,209]], clicks:[1.2] },
+    captions:[{ t:[2.6,6.7], pos:'bl', title:'Reprograman sin llamadas', sub:'Sin ida y vuelta de mensajes.' }],
+  },
+
+  { id:'cancelacion', name:'Cancelación', dur:6.6,
+    shots:[
+      { img:'reprogramacion', cont:true, cam:[[0.9,1000,330,1.2]] },
+      { img:'cancelacion', at:1.5, fade:0.6, cam:[
+        [1.5,822,338,1.2,'free'],[1.9,822,338,1.2,'free'],[2.8,1030,560,1.22],[3.9,1030,560,1.22],
+        [4.9,560,575,1.25],[6.6,560,577,1.26]] },
+    ],
+    highlights:[
+      { img:'reprogramacion', rect:[1126,202,86,27], t:[0.7,1.6] },
+      { img:'cancelacion', rect:[1140,473,72,40], t:[2.8,3.6] },
+      { img:'cancelacion', rect:[882,589,92,24], t:[3.3,4.1], style:'soft' },
+      { img:'cancelacion', rect:[1076,622,134,40], t:[3.3,4.1] },
+      { img:'cancelacion', rect:[133,701,224,48], t:[4.9,6.6], style:'gap', dim:true },
+    ],
+    cursor:{ img:'reprogramacion', path:[[0.3,1080,340],[1.1,1168,215]], clicks:[1.2] },
+    captions:[{ t:[5.0,6.6], pos:'br', title:'¿Se libera un horario?' }],
+  },
+
+  { id:'espera', name:'Lista de espera', dur:5.8,
+    shots:[
+      { img:'cancelacion', cont:true, cam:[[1.0,600,380,1.25]] },
+      { img:'espera', at:1.0, fade:0.7, cam:[[1.0,579,329,1.25],[3.4,579,329,1.26],[4.4,1000,360,1.2],[5.8,1000,362,1.21]] },
+    ],
+    highlights:[
+      { img:'espera', rect:[62,327,352,18], t:[2.1,3.6], pad:3 },
+      { img:'espera', rect:[1144,194,70,27], t:[4.3,5.8], style:'soft' },
+      { img:'espera', rect:[860,334,286,130], t:[4.5,5.8] },
+    ],
+    captions:[{ t:[2.1,5.7], pos:'bl', title:'NAMI activa la lista de espera', sub:'Sin intervención manual.' }],
+  },
+
+  { id:'recuperado', name:'Turno recuperado', dur:5.2,
+    shots:[
+      { img:'espera', cont:true, cam:[[2.0,1000,362,1.21],[3.0,500,560,1.25],[5.2,500,562,1.26]] },
+    ],
+    highlights:[
+      { img:'espera', rect:[1115,503,86,42], t:[0.5,1.9] },
+      { img:'espera', rect:[111,692,225,48], t:[2.9,5.2], dim:true, check:3.8 },
+    ],
+    captions:[{ t:[3.5,5.4], pos:'br', title:'Horario recuperado <em>✓</em>', sub:'La agenda no pierde ese turno.' }],
+  },
+
+  { id:'cta', name:'Resultado', dur:6.8,
+    shots:[
+      { img:'resultado', fade:0.8, cam:[[0,648,407,0.9],[1.0,648,407,0.9],[2.1,648,160,1.15],[2.9,648,160,1.16],[3.8,820,165,1.3],[4.8,820,165,1.31]] },
+    ],
+    highlights:[
+      { img:'resultado', rect:[133,118,262,40], t:[2.0,3.1], style:'soft' },
+      { img:'resultado', rect:[755,110,190,40], t:[2.2,3.1], style:'soft' },
+      { img:'resultado', rect:[757,156,166,32], t:[3.6,4.9], pulse:true },
+    ],
+    outro:4.7,   // desde acá: fade del producto y cierre de marca
+  },
+];
+
+/* Parches sobre las capturas: muestran el estado ANTERIOR (recortado de otra captura real)
+   o tapan una línea que todavía no ocurrió, y se desvanecen en `reveal` → el cambio sucede en su lugar. */
+const CHAT = 'rgb(242,239,234)';
+const patches = [
+  // 03 · Martina: Sin confirmar → Confirmado, 3/7 → 4/7, actividad, banner
+  { on:'confirmacion', rect:[127,425,223,47], from:'recordatorios', src:[118,721,250,54], reveal:['confirmacion',4.7], fade:0.8 },
+  { on:'confirmacion', rect:[80,242,52,28],   from:'recordatorios', src:[65,517,58,31],   reveal:['confirmacion',4.9] },
+  { on:'confirmacion', rect:[78,330,250,18],  color:'#fff', reveal:['confirmacion',5.1] },
+  { on:'confirmacion', rect:[50,0,1215,142],  color:'#fff', reveal:['confirmacion',5.4] },
+  // 04 · Julián: 10:30 → Disponible, Jue 24 09:45 → Julián Reprogramado
+  { on:'reprogramacion', rect:[211,539,223,48], from:'confirmacion', src:[127,532,223,48], reveal:['reprogramacion',5.3], fade:0.7 },
+  { on:'reprogramacion', rect:[442,485,224,48], from:'confirmacion', src:[358,478,224,48], reveal:['reprogramacion',5.7], fade:0.7 },
+  { on:'reprogramacion', rect:[164,248,52,28],  from:'confirmacion', src:[80,242,52,28],   reveal:['reprogramacion',5.6] },
+  { on:'reprogramacion', rect:[360,248,22,28],  from:'confirmacion', src:[276,242,22,28],  reveal:['reprogramacion',5.6] },
+  { on:'reprogramacion', rect:[160,356,290,18], color:'#fff', reveal:['reprogramacion',5.5] },
+  { on:'reprogramacion', rect:[510,88,320,24],  color:'#fff', reveal:['reprogramacion',5.9] },
+  // 05 · Carla: Carla Ruiz → Disponible (lento, a propósito)
+  { on:'cancelacion', rect:[133,701,224,48], from:'reprogramacion', src:[211,701,223,48], reveal:['cancelacion',5.2], fade:1.0 },
+  { on:'cancelacion', rect:[86,248,52,28],   from:'reprogramacion', src:[164,246,52,28],  reveal:['cancelacion',5.4] },
+  { on:'cancelacion', rect:[464,248,22,28],  from:'reprogramacion', src:[542,246,22,28],  reveal:['cancelacion',5.4] },
+  { on:'cancelacion', rect:[84,357,215,18],  color:'#fff', reveal:['cancelacion',5.5] },
+  { on:'cancelacion', rect:[84,103,270,20],  color:'#fff', reveal:['cancelacion',5.6] },
+  // 06/07 · Sofía: NAMI ofrece → Sofía acepta → 16:00 recuperado
+  { on:'espera', rect:[42,0,1200,137],   from:'cancelacion', src:[63,7,1200,137] },
+  { on:'espera', rect:[62,326,352,20],   color:'#fff', reveal:['espera',1.7], fade:0.6 },
+  { on:'espera', rect:[62,347,378,20],   color:'#fff', reveal:['recuperado',1.6], fade:0.6 },
+  { on:'espera', rect:[1108,497,100,54], color:CHAT, reveal:['recuperado',0.35], fade:0.4 },
+  { on:'espera', rect:[856,466,122,32],  color:CHAT, reveal:['recuperado',0.8], fade:0.4 },
+  { on:'espera', rect:[855,549,296,70],  color:CHAT, reveal:['recuperado',1.4], fade:0.5 },
+  { on:'espera', rect:[66,240,52,28],    from:'cancelacion', src:[86,248,52,28],  reveal:['recuperado',3.2] },
+  { on:'espera', rect:[626,239,22,28],   from:'cancelacion', src:[646,248,22,28], reveal:['recuperado',3.2] },
+  { on:'espera', rect:[111,692,225,48],  from:'cancelacion', src:[133,701,224,48], reveal:['recuperado',3.0], fade:0.9 },
+];
+
+/* ════════════════════════════════════════════════════════════════
+   MOTOR — render(t) es una función pura del tiempo: pausa, saltos y grabación son exactos.
+   ════════════════════════════════════════════════════════════════ */
+const ease = {
+  io:  u => u < .5 ? 4*u*u*u : 1 - Math.pow(-2*u + 2, 3) / 2,
+  out: u => 1 - Math.pow(1 - u, 3),
+};
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const c01 = v => clamp(v, 0, 1);
+const lerp = (a, b, u) => a + (b - a) * u;
+function ramp(t, t0, t1, fin = .35, fout = .35) {
+  if (t < t0 || t > t1) return 0;
+  return Math.min(ease.out(c01((t - t0) / fin)), ease.io(c01((t1 - t) / fout)));
+}
+
+const $ = id => document.getElementById(id);
+const stage = $('stage'), frame = $('frame'), view = $('view'), ov = $('ov');
+const cursorEl = $('cursor'), rippleEl = $('ripple'), endEl = $('end'), progEl = $('prog'), scnEl = $('scn');
+
+const SHOTS = [], HLS = [], CAPS = [], CURSORS = [];
+let TOTAL = 0, OUTRO = Infinity;
+
+function kf(img, t, x, y, z, free) {
+  const I = IMAGES[img], s = z * I.ui;
+  let ox = FW / 2 - x * s, oy = FH / 2 - y * s;
+  if (!free) {
+    const dw = I.w * s, dh = I.h * s;
+    ox = dw >= FW ? clamp(ox, FW - dw, 0) : (FW - dw) / 2;
+    oy = dh >= FH ? clamp(oy, FH - dh, 0) : (FH - dh) / 2;
+  }
+  return { t, ox, oy, s };
+}
+
+function compile() {
+  let T = 0;
+  scenes.forEach(sc => {
+    sc.start = T;
+    sc.shots.forEach(sh => {
+      const g = { img: sh.img, start: T + (sh.at || 0), fade: sh.cont ? 0 : (sh.fade ?? 0.7), kfs: [] };
+      if (sh.cont) { const p = SHOTS[SHOTS.length - 1]; g.kfs.push({ ...p.kfs[p.kfs.length - 1], t: g.start }); }
+      sh.cam.forEach(k => g.kfs.push(kf(sh.img, T + k[0], k[1], k[2], k[3], k[4] === 'free')));
+      SHOTS.push(g);
+    });
+    (sc.highlights || []).forEach(h => HLS.push({ ...h, t0: T + h.t[0], t1: T + h.t[1], chkAt: h.check != null ? T + h.check : null }));
+    (sc.captions || []).forEach(c => CAPS.push({ ...c, t0: T + c.t[0], t1: T + c.t[1] }));
+    if (sc.cursor) CURSORS.push({
+      img: sc.cursor.img,
+      path: sc.cursor.path.map(p => [T + p[0], p[1], p[2]]),
+      clicks: sc.cursor.clicks.map(c => T + c),
+    });
+    if (sc.outro != null) OUTRO = T + sc.outro;
+    T += sc.dur;
+  });
+  TOTAL = T;
+  const at = ref => scenes.find(s => s.id === ref[0]).start + ref[1];
+  patches.forEach(p => { p.rt = p.reveal ? at(p.reveal) : Infinity; p.fd = p.fade ?? 0.5; p.els = []; });
+}
+
+function build() {
+  SHOTS.forEach(sh => {
+    const I = IMAGES[sh.img];
+    const el = document.createElement('div');
+    el.className = 'layer';
+    el.style.width = I.w + 'px'; el.style.height = I.h + 'px';
+    const im = document.createElement('img'); im.src = I.src; im.alt = ''; el.appendChild(im);
+    patches.filter(p => p.on === sh.img).forEach(p => {
+      const d = document.createElement('div'); d.className = 'patch';
+      const [x, y, w, h] = p.rect;
+      Object.assign(d.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+      if (p.color) d.style.background = p.color;
+      else {
+        const F = IMAGES[p.from], [sx, sy, sw, sh2] = p.src, kx = w / sw, ky = h / sh2;
+        d.style.backgroundImage = `url(${F.src})`;
+        d.style.backgroundSize = `${F.w * kx}px ${F.h * ky}px`;
+        d.style.backgroundPosition = `${-sx * kx}px ${-sy * ky}px`;
+      }
+      el.appendChild(d); p.els.push(d);
+    });
+    view.insertBefore(el, ov);
+    sh.el = el;
+  });
+  HLS.forEach(h => {
+    const d = document.createElement('div');
+    d.className = 'hl ' + (h.style || 'focus') + (h.dim ? ' dim' : '');
+    if (h.check != null) {
+      d.innerHTML = '<span class="chk"><svg viewBox="0 0 16 16"><path d="M3.2 8.4l3 3 6.6-7" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+      h.chk = d.firstChild;
+    }
+    ov.insertBefore(d, rippleEl); h.el = d;
+  });
+  const caps = $('caps');
+  CAPS.forEach(c => {
+    const d = document.createElement('div');
+    d.className = `cap ${c.pos || 'bl'} ${c.style || ''}`;
+    d.innerHTML = c.style === 'kicker'
+      ? `<div class="card"><span class="dot"></span><span class="t">${c.title}</span></div>`
+      : `<div class="card"><div class="ln"></div><div class="t">${c.title}</div>${c.sub ? `<div class="s">${c.sub}</div>` : ''}</div>`;
+    caps.appendChild(d); c.el = d;
+  });
+  scenes.forEach((s, i) => {
+    if (!i) return;
+    const tk = document.createElement('i'); tk.style.left = (s.start / TOTAL * 100) + '%'; progEl.appendChild(tk);
+  });
+}
+
+function camOf(sh, t) {
+  const k = sh.kfs;
+  if (t <= k[0].t) return k[0];
+  for (let i = 0; i < k.length - 1; i++) {
+    if (t < k[i + 1].t) {
+      const u = ease.io(c01((t - k[i].t) / (k[i + 1].t - k[i].t)));
+      return { ox: lerp(k[i].ox, k[i + 1].ox, u), oy: lerp(k[i].oy, k[i + 1].oy, u), s: lerp(k[i].s, k[i + 1].s, u) };
+    }
+  }
+  return k[k.length - 1];
+}
+function alphaOf(i, t) {
+  const s = SHOTS[i], n = SHOTS[i + 1];
+  if (t < s.start) return 0;
+  if (n && t >= n.start + n.fade) return 0;
+  return s.fade > 0 ? ease.io(c01((t - s.start) / s.fade)) : 1;
+}
+function shotFor(img, t) {
+  let idx = -1;
+  SHOTS.forEach((s, i) => { if (s.img === img && (s.start <= t || idx < 0)) idx = i; });
+  return idx;
+}
+const toFrame = (c, x, y) => [c.ox + x * c.s, c.oy + y * c.s];
+
+let curScene = -1;
+function render(t) {
+  // Capturas + cámara
+  const A = SHOTS.map((_, i) => alphaOf(i, t)), V = new Array(SHOTS.length);
+  let cover = 1;
+  for (let i = SHOTS.length - 1; i >= 0; i--) { V[i] = A[i] * cover; cover *= 1 - A[i]; }
+  const cams = SHOTS.map((sh, i) => {
+    const c = camOf(sh, t);
+    if (A[i] > 0.001) {
+      sh.el.style.visibility = 'visible';
+      sh.el.style.opacity = A[i];
+      sh.el.style.transform = `translate3d(${c.ox}px,${c.oy}px,0) scale(${c.s})`;
+    } else sh.el.style.visibility = 'hidden';
+    return c;
+  });
+  const visOf = img => { let v = 0; SHOTS.forEach((s, i) => { if (s.img === img) v += V[i]; }); return v; };
+
+  // Parches (cambios de estado in situ)
+  patches.forEach(p => {
+    const o = 1 - ease.io(c01((t - p.rt) / p.fd));
+    p.els.forEach(e => e.style.opacity = o);
+  });
+
+  // Highlights
+  HLS.forEach(h => {
+    let a = ramp(t, h.t0, h.t1);
+    if (a > 0) a *= visOf(h.img);
+    if (a <= 0.001) { h.el.style.opacity = 0; return; }
+    const c = cams[shotFor(h.img, t)], pad = h.pad ?? 6;
+    const [x, y] = toFrame(c, h.rect[0], h.rect[1]);
+    const w = h.rect[2] * c.s + pad * 2, hh = h.rect[3] * c.s + pad * 2;
+    const k = 1 + 0.035 * (1 - ease.out(c01((t - h.t0) / .45)));
+    h.el.style.opacity = a;
+    h.el.style.width = w + 'px';
+    h.el.style.height = hh + 'px';
+    h.el.style.transform = `translate3d(${x - pad - (k - 1) * w / 2}px,${y - pad - (k - 1) * hh / 2}px,0) scale(${k})`;
+    if (h.pulse) {
+      const p = (Math.sin((t - h.t0) * 3.2 - Math.PI / 2) + 1) / 2;
+      h.el.style.boxShadow = `0 0 0 ${5 + p * 5}px rgba(0,175,255,${.2 - p * .1}), 0 14px 34px -12px rgba(0,175,255,.5)`;
+    }
+    if (h.chk) {
+      const u = c01((t - h.chkAt) / .45);
+      h.chk.style.transform = `scale(${t < h.chkAt ? 0 : 0.6 + 0.4 * ease.out(u)})`;
+      h.chk.style.opacity = t < h.chkAt ? 0 : ease.out(u);
+    }
+  });
+
+  // Cursor + ripple
+  let cOp = 0, press = 1;
+  rippleEl.style.opacity = 0;
+  CURSORS.forEach(cu => {
+    const t0 = cu.path[0][0], tEnd = cu.clicks[cu.clicks.length - 1] + .55;
+    if (t < t0 - .01 || t > tEnd + .4) return;
+    cOp = Math.min(ease.out(c01((t - t0) / .3)), 1 - ease.io(c01((t - tEnd) / .4)));
+    const c = cams[shotFor(cu.img, t)], P = cu.path;
+    let x, y;
+    if (t <= P[0][0]) [x, y] = toFrame(c, P[0][1], P[0][2]);
+    else if (t >= P[P.length - 1][0]) [x, y] = toFrame(c, P[P.length - 1][1], P[P.length - 1][2]);
+    else for (let i = 0; i < P.length - 1; i++) if (t < P[i + 1][0]) {
+      const u = ease.io((t - P[i][0]) / (P[i + 1][0] - P[i][0]));
+      const [ax, ay] = toFrame(c, P[i][1], P[i][2]), [bx, by] = toFrame(c, P[i + 1][1], P[i + 1][2]);
+      const dx = bx - ax, dy = by - ay, d = Math.hypot(dx, dy) || 1, arc = Math.sin(Math.PI * u) * Math.min(36, d * .12);
+      x = lerp(ax, bx, u) + (-dy / d) * arc; y = lerp(ay, by, u) + (dx / d) * arc;
+      break;
+    }
+    cu.clicks.forEach(ck => {
+      const d = t - ck;
+      if (d >= 0 && d < .24) press = 1 - .13 * Math.sin(Math.PI * d / .24);
+      if (d >= 0 && d < .7) {
+        const u = d / .7;
+        rippleEl.style.opacity = .9 * (1 - u);
+        rippleEl.style.transform = `translate3d(${x}px,${y}px,0) scale(${.25 + .95 * ease.out(u)})`;
+      }
+    });
+    cursorEl.style.transform = `translate3d(${x - 3}px,${y - 2}px,0) scale(${press})`;
+  });
+  cursorEl.style.opacity = cOp;
+
+  // Captions
+  CAPS.forEach(c => {
+    const a = ramp(t, c.t0, c.t1, .6, .45);
+    const u = ease.out(c01((t - c.t0) / .7));
+    c.el.style.opacity = a;
+    c.el.style.transform = `translate3d(0,${(1 - u) * 16}px,0)`;
+  });
+
+  // Entrada / cierre
+  const inA = ease.out(c01(t / .9)), outU = ease.io(c01((t - OUTRO) / .9));
+  frame.style.opacity = inA * (1 - outU);
+  frame.style.transform = `translate3d(0,${(1 - inA) * 18 - outU * 6}px,0) scale(${(0.985 + .015 * inA) * (1 - .015 * outU)})`;
+  frame.style.filter = outU > 0 ? `blur(${outU * 6}px)` : 'none';
+  const chA = ease.out(c01((t - .2) / .8)) * (1 - outU);
+  $('chrome-l').style.opacity = chA; $('chrome-r').style.opacity = chA;
+  const endU = ease.out(c01((t - OUTRO - .35) / .9));
+  endEl.style.opacity = endU;
+  endEl.style.transform = `translate3d(0,${(1 - endU) * 12}px,0)`;
+
+  // Progreso + indicador de escena
+  progEl.style.opacity = ease.out(c01(t / .9)) * .9 * (1 - outU * .6);
+  progEl.firstChild.style.width = (c01(t / TOTAL) * 100) + '%';
+  const si = sceneIndexAt(t);
+  if (si !== curScene) {
+    curScene = si;
+    scnEl.classList.add('swap');
+    scnEl.querySelector('.n').textContent = String(si + 1).padStart(2, '0');
+    scnEl.querySelector('.o').textContent = '/ ' + String(scenes.length).padStart(2, '0');
+    scnEl.querySelector('.nm').textContent = scenes[si].name;
+    requestAnimationFrame(() => requestAnimationFrame(() => scnEl.classList.remove('swap')));
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   REPRODUCCIÓN + CONTROLES  (Space pausa · R reinicia · ← → escena)
+   ════════════════════════════════════════════════════════════════ */
+let t = -START_DELAY, playing = true, last = null;
+
+function sceneIndexAt(x) { let si = 0; scenes.forEach((s, i) => { if (x >= s.start) si = i; }); return si; }
+function fit() {
+  const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+  stage.style.transform = `translate(-50%,-50%) scale(${k})`;
+}
+function tick(now) {
+  if (last == null) last = now;
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  if (playing) {
+    t += dt;
+    if (t >= TOTAL) {
+      if (!LOOP && !EMBED) { t = TOTAL; playing = false; }
+      else if (t >= TOTAL + LOOP_GAP) t = -START_DELAY / 2;
+    }
+  }
+  render(clamp(t, -1, TOTAL));
+  requestAnimationFrame(tick);
+}
+let started = !EMBED;
+function setPlaying(p, user) {
+  if (p && !started) { started = true; t = -START_DELAY; }
+  playing = p;
+  if (EMBED) parent.postMessage({ nami: 'state', playing, user: !!user }, '*');
+}
+if (EMBED) {
+  addEventListener('message', e => {
+    if (e.source !== parent || !e.data) return;
+    if (e.data.nami === 'play') setPlaying(true);
+    if (e.data.nami === 'pause') setPlaying(false);
+  });
+  stage.addEventListener('click', () => setPlaying(!playing, true));
+  stage.style.cursor = 'pointer';
+}
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); if (!playing && t >= TOTAL) t = -START_DELAY; setPlaying(!playing, true); }
+  else if (e.key === 'r' || e.key === 'R') { t = -START_DELAY; playing = true; }
+  else if (e.key === 'ArrowRight') { const i = sceneIndexAt(Math.max(t, 0)); t = i + 1 < scenes.length ? scenes[i + 1].start : TOTAL; }
+  else if (e.key === 'ArrowLeft') { const i = sceneIndexAt(Math.max(t, 0)); t = (t - scenes[i].start > .8 || i === 0) ? scenes[i].start : scenes[i - 1].start; }
+});
+addEventListener('resize', fit);
+
+// Revisión puntual:  ?scene=4   ?t=18.5   ?paused
+window.seek = x => { t = x; render(clamp(t, -1, TOTAL)); };
+
+(async function init() {
+  fit();
+  await Promise.all(Object.values(IMAGES).map(I => new Promise((ok, ko) => {
+    const im = new Image();
+    im.onload = () => { I.w = im.naturalWidth / I.dpr; I.h = im.naturalHeight / I.dpr; ok(); };
+    im.onerror = () => ko(new Error('No se pudo cargar ' + I.src));
+    im.src = I.src;
+  })));
+  try { await document.fonts.ready; } catch (_) {}
+  compile(); build();
+  const q = new URLSearchParams(location.search);
+  if (q.has('scene')) t = scenes[clamp(+q.get('scene') - 1, 0, scenes.length - 1)].start;
+  if (q.has('t')) t = +q.get('t');
+  if (q.has('paused')) playing = false;
+  if (EMBED) { playing = false; t = POSTER_T; parent.postMessage({ nami: 'ready' }, '*'); }
+  render(clamp(t, -1, TOTAL));
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

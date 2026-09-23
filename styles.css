@@ -954,6 +954,80 @@ button {
 .featured-demo {
   min-width: 0;
 }
+.featured-film {
+  position: relative;
+  margin: clamp(72px, 9vw, 132px) 0 0;
+}
+.film-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 24px;
+  margin-bottom: 20px;
+}
+.film-head .eyebrow {
+  margin: 0;
+  color: #cfcfcf;
+}
+.film-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--white);
+  font: 600 12px/1 var(--display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 0.22s var(--ease),
+    background 0.22s var(--ease);
+}
+.film-toggle:hover {
+  border-color: var(--cyan);
+  background: #00afff14;
+}
+.film-toggle:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+.film-icon {
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-inline: 3px solid var(--cyan);
+}
+.film-toggle[aria-pressed="true"] .film-icon {
+  width: 0;
+  height: 0;
+  border: 0;
+  border-left: 10px solid var(--cyan);
+  border-block: 5px solid transparent;
+}
+.film-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: clamp(10px, 1.4vw, 20px);
+  overflow: hidden;
+  background: #f8f8f6;
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 70px 140px -60px #00afff40,
+    0 40px 90px -40px #000;
+}
+.film-frame iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 .demo-stage {
   position: relative;
   padding-bottom: 175px;

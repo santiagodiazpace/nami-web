@@ -361,6 +361,24 @@
     ['servicios','soluciones','demo-turnos','proyectos','nosotros','contacto','vision','proceso','inicio'].forEach(id => sectionObserver.observe(document.getElementById(id)));
   }
 
+  // Showcase film: plays only while on screen; reduced motion starts paused on a still frame.
+  const film = $('.featured-film');
+  if (film) {
+    const frame = $('iframe', film), toggle = $('.film-toggle', film), label = $('.film-label', film);
+    let wanted = !reduced.matches, onScreen = false, ready = false;
+    const paint = () => {toggle.setAttribute('aria-pressed', String(!wanted));label.textContent = wanted ? 'Pausar' : 'Reproducir';};
+    const sync = () => {if (ready) frame.contentWindow.postMessage({nami: wanted && onScreen ? 'play' : 'pause'}, '*');};
+    addEventListener('message', e => {
+      if (e.source !== frame.contentWindow || !e.data || !e.data.nami) return;
+      if (e.data.nami === 'ready') {ready = true;sync();}
+      else if (e.data.nami === 'state' && e.data.user) {wanted = e.data.playing;paint();}
+    });
+    toggle.addEventListener('click', () => {wanted = !wanted;paint();sync();});
+    if ('IntersectionObserver' in window) new IntersectionObserver(entries => {onScreen = entries[0].isIntersecting;sync();}, {threshold:.35}).observe(frame);
+    else onScreen = true;
+    paint();
+  }
+
   // Keep the standard pointer; use a contextual companion only over project previews.
   const hint = $('.cursor-hint');
   document.addEventListener('pointermove', event => {
